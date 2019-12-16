@@ -6,11 +6,9 @@ class SimpleModel:
     def __init__(self):
         """This should initiliase your algorithm. Here we do not need to pass any parameters.
         But we want to define a new attribute `most_common` that will contain the most common class.
-        
         For initialisation, just assign it to None.
         """
-
-        pass
+        self.most_common = None
 
     def fit(self, X, y):
         """Fit the model using X and y data. Both X and y are assumed to be numpy arrays.
@@ -19,16 +17,17 @@ class SimpleModel:
         self.most_common to it.
         There are multiple ways to do so, no need to find the most optimised one.
         """
-
-        pass
+        values, counts = np.unique(y, return_counts=True)
+        idx = np.argmax(counts)
+        self.most_common = values[idx]
 
     def predict(self, X):
         """Generates y_pred from a given X matrix. Here we want to predict self.most_common for each
         observation, so you only need to return a vector of same length as number of observations in X
         where each value is equal to self.most_common
         """
-
-        pass
+        y_pred = np.ones(X.shape[0])
+        return y_pred
 
 
 class LogisticRegression:
@@ -38,15 +37,16 @@ class LogisticRegression:
         parameters, the learning rate gamma (which we default to .001 here) and the
         number of steps nr_steps (defaulting to 1000)
         """
-
-        pass
+        self.w = None
+        self.gamma = gamma
+        self.nr_steps = nr_steps
 
     def sigmoid(self, y):
         """Implement a sigmoid method that computes the sigmoid for a vector
         y and returns it.
         """
-
-        pass
+        output = 1 / (1 + np.exp(-y))
+        return output
 
     def predicted_values(self, X, w):
         """Implement the predicted_values method that takes:
@@ -57,8 +57,9 @@ class LogisticRegression:
         * `p` - an N dimensional output of predicted probabilities
         (you can use your `sigmoid` method)
         """
-
-        pass
+        p = X @ w
+        p = self.sigmoid(p)
+        return p
 
     def gradient(self, X, y, w):
         """Implement the gradient method that takes:
@@ -72,8 +73,10 @@ class LogisticRegression:
         It's the same as for the logistic regression notebook, 
         just make sure you're reusing the predicted_values method we've defined on the class.
         """
-
-        pass
+        y_pred = self.predicted_values(X, w)
+        dim = y.shape[0]
+        gradient = 1 / dim * X.T @ (y_pred - y)
+        return gradient
 
     def fit(self, X, y):
         """Implement the fit function that takes a matrix X and a vector y as parameters.
@@ -84,8 +87,11 @@ class LogisticRegression:
         It is similar to what the simpleGD function from the previous notebook does,
         but here we do not need to keep the history, only setting w.
         """
+        self.w = np.zeros(X.shape[1])
 
-        pass
+        for _ in range(self.nr_steps):
+            self.w -= self.gamma * self.gradient(X, y, self.w)
+        return self.w
 
     def predict(self, X):
         """Implement predict to predict binary classes, 0 or 1. 
@@ -94,5 +100,6 @@ class LogisticRegression:
         set of weights, self.w. Check if the probability is higher than
         a given threshold (use .5) and return the right classes accordingly.
         """
-
-        pass
+        threshold = 0.5
+        y_pred = self.predicted_values(X, self.w)
+        return (y_pred > threshold).astype(int)
